@@ -1,21 +1,11 @@
 import asyncio
 from DeepSeekOllamaTest import DeepSeekChat
-
+from chat_gui import ChatGUI
 
 async def main():
-    async with DeepSeekChat() as chatbot:
-        while True:
-            user_input = input("\nВы: ")
-
-            # Потоковый вывод
-            print("Ассистент: ", end='', flush=True)
-            async for chunk in chatbot.chat_stream(user_input):
-                print(chunk, end='', flush=True)
-
-            # Или получение полного ответа
-            # full_response = await chatbot.chat(user_input)
-            # print(f"\nАссистент: {full_response}")
-
+    async with DeepSeekChat() as chat_client:
+        gui = ChatGUI(chat_client)
+        gui.run()
 
 if __name__ == "__main__":
     asyncio.run(main())

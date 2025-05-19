@@ -1,5 +1,3 @@
-import asyncio
-from typing import AsyncGenerator
 from ollama import AsyncClient
 
 
@@ -9,37 +7,23 @@ class DeepSeekChat:
         self.model = model
         self.messages_history = []
 
-    async def chat_stream(self, prompt: str) -> AsyncGenerator[str, None]:
-        """Асинхронный генератор для потокового ответа"""
+    async def chat(self, prompt: str) -> str:
+        """Возвращает полный ответ"""
         self._add_message('user', prompt)
 
         response = await self.client.chat(
             model=self.model,
-            messages=self.messages_history,
-            stream=True
+            messages=self.messages_history
         )
 
-        full_response = []
-        async for chunk in response:
-            content = chunk['message']['content']
-            full_response.append(content)
-            yield content
-
-        self._add_message('assistant', ''.join(full_response))
-
-    async def chat(self, prompt: str) -> str:
-        """Синхронный интерфейс для получения полного ответа"""
-        response = []
-        async for chunk in self.chat_stream(prompt):
-            response.append(chunk)
-        return ''.join(response)
+        full_response = response['message']['content']
+        self._add_message('assistant', full_response)
+        return full_response
 
     def reset_history(self):
-        """Сброс истории разговора"""
         self.messages_history = []
 
     def _add_message(self, role: str, content: str):
-        """Внутренний метод для добавления сообщений в историю"""
         self.messages_history.append({
             'role': role,
             'content': content
